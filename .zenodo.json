@@ -1,0 +1,46 @@
+{
+    "creators": [
+        {
+            "orcid": "0000-0002-3443-5032",
+            "affiliation": "Peter Grünberg Institut and Institute for Advanced Simulation, Forschungszentrum Jülich and JARA, D-52425 Jülich, Germany",
+            "name": "Hilgers, Robin"
+        },
+        {
+            "orcid": "0000-0002-2248-1904",
+            "affiliation": "Peter Grünberg Institut and Institute for Advanced Simulation, Forschungszentrum Jülich and JARA, D-52425 Jülich, Germany",
+            "name": "Wortmann, Daniel"
+        },
+        {
+            "orcid": "0000-0001-9987-4733",
+            "affiliation": "Peter Grünberg Institut and Institute for Advanced Simulation, Forschungszentrum Jülich and JARA, D-52425 Jülich, Germany",
+            "name": "Blügel, Stefan"
+        }
+
+    ],
+
+    "license": "cc-by-nc-4.0",
+
+    "title": "Data processing for the JuHemd database and ML-training and evaluation scripts",
+
+    "related_identifiers": [
+        {
+            "scheme": "doi",
+            "identifier": "10.24435/materialscloud:ww-pv",
+            "relation": "isRequiredBy",
+            "resource_type": "Dataset"
+        },
+        {
+            "scheme": "doi",
+            "identifier": "10.24435/materialscloud:w1-yf",
+            "relation": "isCreatedBy",
+            "resource_type": "Dataset"
+        }
+
+    ],
+
+    "keywords": ["Material science","Machine learning","Heusler alloy","Data processing","Magnetic materials","Curie temperature","Density-functional theory","JuDFT"],
+
+    "communities": [
+        {"identifier": ""}
+    ]
+}
