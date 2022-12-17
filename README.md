@@ -1,3 +1,5 @@
+ Copyright (c) 2022 Peter Grünberg Institut, Forschungszentrum Jülich, Germany
+
 This software publication contains python code which:
 
 1.    Process the JuHemd (see related identifiers) database so that complete data points are selected to be processed in a machine readable and ML-ready format. 
