@@ -28,13 +28,13 @@
             "scheme": "doi",
             "identifier": "10.24435/materialscloud:ww-pv",
             "relation": "isRequiredBy",
-            "resource_type": "dataset"
+            "upload_type": "dataset"
         },
         {
             "scheme": "doi",
             "identifier": "10.24435/materialscloud:w1-yf",
             "relation": "isCompiledBy",
-            "resource_type": "dataset"
+            "upload_type": "dataset"
         }
 
     ],
