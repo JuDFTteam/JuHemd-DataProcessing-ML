@@ -392,10 +392,10 @@ plt.clf()
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),classify(LL.predict(testData),thres,labels).astype(str),labels=['0','1'])
 cmd = ConfusionMatrixDisplay(cm,display_labels=['Low Tc','High Tc'])
 cmd.plot()
-plt.savefig('ConfIndLLoDFT.png')
+plt.savefig('ConfIndLLNoDFT.png')
 
 #Direct via ETC
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),ETC.predict(testData).astype(str),labels=['0','1'])
 cmd = ConfusionMatrixDisplay(cm,display_labels=['Low Tc','High Tc'])
 cmd.plot()
-plt.savefig('ConfDirETCoDFT.png')
+plt.savefig('ConfDirETCNoDFT.png')
