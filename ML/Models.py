@@ -294,20 +294,20 @@ print('Feature importance plot generated.')
 ##Confusion Matrices
 #Indirect via ETR
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),classify(ETR.predict(testData),thres,labels).astype(str),labels=['0','1'])
-cmd = ConfusionMatrixDisplay(cm,display_labels=['Low Tc','High Tc'])
+cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
 plt.savefig('ConfIndETR.png')
 plt.clf()
 
 #Indirect via LASSOLars
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),classify(LL.predict(testData),thres,labels).astype(str),labels=['0','1'])
-cmd = ConfusionMatrixDisplay(cm,display_labels=['Low Tc','High Tc'])
+cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
 plt.savefig('ConfIndLL.png')
 
 #Direct via ETC
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),ETC.predict(testData).astype(str),labels=['0','1'])
-cmd = ConfusionMatrixDisplay(cm,display_labels=['Low Tc','High Tc'])
+cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
 plt.savefig('ConfDirETC.png')
 
@@ -383,19 +383,19 @@ modelEvalIndClass(ETR,'Indirect ETR Class no DFT data',testTc,trainTc,testData,t
 ##Confusion Matrices
 #Indirect via ETR
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),classify(ETR.predict(testData),thres,labels).astype(str),labels=['0','1'])
-cmd = ConfusionMatrixDisplay(cm,display_labels=['Low Tc','High Tc'])
+cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
 plt.savefig('ConfIndETRNoDFT.png')
 plt.clf()
 
 #Indirect via LASSOLars
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),classify(LL.predict(testData),thres,labels).astype(str),labels=['0','1'])
-cmd = ConfusionMatrixDisplay(cm,display_labels=['Low Tc','High Tc'])
+cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
 plt.savefig('ConfIndLLNoDFT.png')
 
 #Direct via ETC
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),ETC.predict(testData).astype(str),labels=['0','1'])
-cmd = ConfusionMatrixDisplay(cm,display_labels=['Low Tc','High Tc'])
+cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
 plt.savefig('ConfDirETCNoDFT.png')
