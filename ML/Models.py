@@ -50,11 +50,7 @@ try:
     dataNoDFT=np.genfromtxt(path+'/DataClearedFromDTF.txt')[:, 1:]
     print('Path Found')
 except:
-    tc=np.genfromtxt("/home/hilgers/PhD/Heuslers/2022_Heusler_Paper_Prep/Data Publication/ML-Ready KKR JuHemd Database/GGA/Tc.txt")
-    data=np.genfromtxt("/home/hilgers/PhD/Heuslers/2022_Heusler_Paper_Prep/Data Publication/ML-Ready KKR JuHemd Database/GGA/Data.txt")[:,1:]
-    dataNoDFT=np.genfromtxt('/home/hilgers/PhD/Heuslers/2022_Heusler_Paper_Prep/Data Publication/ML-Ready KKR JuHemd Database/GGA/DataClearedFromDTF.txt')[:, 1:]
-    descr=np.genfromtxt('/home/hilgers/PhD/Heuslers/2022_Heusler_Paper_Prep/Data Publication/ML-Ready KKR JuHemd Database/GGA/Descriptors.txt',comments='$',dtype=str,delimiter=',')[1:]
-    print('Path not found, fallback solution.')
+    print('Path not found. This will cause an error.')
 
 #Split and shuffle data
 trainData,testData,trainTc,testTc=train_test_split(data,tc,test_size=0.2,shuffle=True ,random_state=3141592)#31415
