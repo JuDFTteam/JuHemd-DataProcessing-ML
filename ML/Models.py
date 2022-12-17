@@ -262,6 +262,7 @@ ax.set(xlabel='Atomic Number')
 plt.grid()
 sns.color_palette("blend:#7AB,#EDA", as_cmap=True)
 plt.savefig("Hist.png",dpi=1200)
+plt.clf()
 print('Histogram generated.')
 
 #Feature Importance using LASSO
