@@ -23,7 +23,7 @@ from sklearn.linear_model import LogisticRegression,LinearRegression
 from sklearn import linear_model
 from sklearn.tree import DecisionTreeRegressor,DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsRegressor as KNN
-#Data Treatment/Splitting
+#Data Treatment/Splitting/Handling
 from sklearn.model_selection import train_test_split
 import numpy as np
 import pandas as pd
