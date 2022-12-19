@@ -291,6 +291,22 @@ plt.savefig("FeatureImportance.png",dpi=600)
 plt.clf()
 print('Feature importance plot generated.')
 
+#Histogram of Tcs
+sns.set_theme(style="ticks")
+f, ax = plt.subplots(figsize=(7, 5))
+sns.despine(f)
+yHist=pd.DataFrame({'Test $T_c$':testTc, '$T_c$':tc})
+sns.histplot(
+    yHist,
+    multiple="layer",
+    edgecolor=".3",
+    linewidth=.5,
+)
+ax.set(xlabel='$T_c$')
+sns.color_palette("blend:#7AB,#EDA", as_cmap=True)
+plt.savefig('TcHist.png',dpi=1200)
+plt.clf()
+
 ##Confusion Matrices
 #Indirect via ETR
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),classify(ETR.predict(testData),thres,labels).astype(str),labels=['0','1'])
