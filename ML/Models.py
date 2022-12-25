@@ -55,6 +55,7 @@ except:
 #Outlier removal
 ind=np.where(tc>1400.0)
 data=np.delete(data,obj=ind, axis=0)
+dataNoDFT=np.delete(dataNoDFT,obj=ind, axis=0)
 tc=np.delete(tc,ind)
 
 #Split and shuffle data
