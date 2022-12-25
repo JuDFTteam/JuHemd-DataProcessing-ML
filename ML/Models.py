@@ -53,6 +53,7 @@ except:
     print('Path not found. This will cause an error.')
 
 #Outlier removal
+tcORIG=tc
 ind=np.where(tc>1400.0)
 data=np.delete(data,obj=ind, axis=0)
 dataNoDFT=np.delete(dataNoDFT,obj=ind, axis=0)
@@ -274,7 +275,7 @@ reg.fit(data, tc)
 print("Score using 5-Fold CV on WHOLE data set: %f" %np.mean(cross_val_score(reg,data,tc,cv=5,scoring='r2')))
 coef = pd.Series(reg.coef_, index = X.columns)
 print("Lasso picked " + str(sum(coef != 0)) + " variables and eliminated " +  str(sum(coef == 0)) + " variables")
-ax1=plt.subplot()
+f,ax1=plt.subplot(figsize=(10, 5))
 reg_coef, descr = zip(*sorted(zip(coef, descr)))
 descr=np.array(descr)
 for i in range (0,len(descr)):
@@ -301,7 +302,7 @@ print('Feature importance plot generated.')
 sns.set_theme(style="whitegrid")
 f, ax = plt.subplots(figsize=(7, 5))
 sns.despine(f)
-yHist1=pd.DataFrame.from_records([testTc,tc],['Test $T_c$','$T_c$'])
+yHist1=pd.DataFrame.from_records([testTc,tcORIG],['Test $T_c$','$T_c$'])
 yHist1=yHist1.transpose()
 sns.histplot(
     data=yHist1,
@@ -313,6 +314,7 @@ ax.set(xlabel='$T_c$')
 sns.color_palette("blend:#7AB,#EDA", as_cmap=True)
 plt.savefig('TcHist.png',dpi=1200)
 plt.clf()
+print('Tc Histogram generated')
 
 
 ##Confusion Matrices
