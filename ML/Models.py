@@ -52,6 +52,11 @@ try:
 except:
     print('Path not found. This will cause an error.')
 
+#Outlier removal
+ind=np.where(tc>1400.0)
+data=np.delete(data,obj=ind, axis=0)
+tc=np.delete(tc,ind)
+
 #Split and shuffle data
 trainData,testData,trainTc,testTc=train_test_split(data,tc,test_size=0.2,shuffle=True ,random_state=3141592)#31415
 
