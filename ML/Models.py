@@ -16,7 +16,7 @@ warnings.warn = warn
 
 #Imports
 #Models/HPO
-from sklearn.ensemble import ExtraTreesRegressor,RandomForestRegressor,ExtraTreesClassifier
+from sklearn.ensemble import ExtraTreesRegressor,RandomForestRegressor,ExtraTreesClassifier, GradientBoostingRegressor
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression,LinearRegression
@@ -39,6 +39,9 @@ plt.rcParams['text.usetex'] = True
 mpl.rcParams['font.family'] = ['Arial']
 from skmisc.loess import loess
 
+#Set random seed for reproducible results
+randomSeed=31415
+
 #Enter path for data to be loaded
 path=input('Enter valid path to files with Heuslers Data (Descriptors.txt ,Tc.txt, Data.txt and DataClearedFromDTF.txt containing folder): ')
 
@@ -52,6 +55,17 @@ try:
 except:
     print('Path not found. This will cause an error.')
 
+#Inp data, output data cleared of meaningless features with 0 Variance and returns removed indices.
+def meaninglessFeaturesRemoval(data):
+  indices=np.zeros(0,dtype=int)
+  for i in range (0,len(data[0,:])):
+    if np.all(data[:,i]==data[0,i]): indices=np.append(indices,int(i))
+  return np.delete(data,obj=indices,axis=1), indices
+
+#Remove meaningless columns
+data,indices=meaninglessFeaturesRemoval(data)
+descr=np.delete(descr,obj= indices,axis=0)
+
 #Outlier removal
 tcORIG=tc
 ind=np.where(tc>1400.0)
@@ -60,7 +74,13 @@ dataNoDFT=np.delete(dataNoDFT,obj=ind, axis=0)
 tc=np.delete(tc,ind)
 
 #Split and shuffle data
-trainData,testData,trainTc,testTc=train_test_split(data,tc,test_size=0.2,shuffle=True ,random_state=3141592)#31415
+trainData,testData,trainTc,testTc=train_test_split(data,tc,test_size=0.2,shuffle=True ,random_state=randomSeed)
+
+#Scaling
+scaler=StandardScaler()
+scaler.fit(trainData)
+trainData=scaler.transform(trainData)
+testData=scaler.transform(testData)
 
 #Small functions for easy evaluation of regression models
 def modelEvalReg(model,nameModel,ytest,ytrain,xtest,xtrain,data,tc):
@@ -68,15 +88,7 @@ def modelEvalReg(model,nameModel,ytest,ytrain,xtest,xtrain,data,tc):
     cv=cross_val_score(model,trainData,trainTc,cv=5,scoring='r2')
     testScore=r2_score(ytest,model.predict(xtest))
     trainScore=r2_score(ytrain,model.predict(xtrain))
-    print('Model performance for '+ nameModel)
-    print('CV: ')
-    print(np.mean(cv))
-    print('CV: ')
-    print(cv)
-    print('R2-Test: ')
-    print(testScore)
-    print('R2-Train:')
-    print(trainScore)
+    print('Model performance for '+ nameModel + ' CV: ' +  str(np.mean(cv)) + ' R2-Test: ' + str(testScore) + ' R2-Train: ' + str(trainScore) )
     return
 
 #Evaluation function for classification models
@@ -85,16 +97,7 @@ def modelEvalClass(model,nameModel,ytest,ytrain,xtest,xtrain,data,tc):
     cv=cross_val_score(model,xtrain,ytrain.astype(int),cv=5,scoring='f1')
     testScore=f1_score(ytest.astype(int),model.predict(xtest).astype(int))
     trainScore=f1_score(ytrain.astype(int),model.predict(xtrain).astype(int))
-    print('Model performance for '+ nameModel)
-    print('CV: ')
-    print(np.mean(cv))
-    print(cv)
-    print('F1-Test: ')
-    print(testScore)
-    print('F1-Train:')
-    print(trainScore)
-    print('Test Acc.:')
-    print(accuracy_score(ytest, model.predict(xtest)))
+    print('Model performance for '+ nameModel + ' CV: '+ str(np.mean(cv))+' F1-Test: '+ str(testScore)+ ' F1-Train: ' + str(trainScore) + ' Test Acc.: ' + str(accuracy_score(ytest, model.predict(xtest)))  
     return
 
 #Classif Func
@@ -119,13 +122,7 @@ def modelEvalIndClass(model,nameModel,ytest,ytrain,xtest,xtrain,data,tc):
     model.fit(xtrain,ytrain)
     testScore=f1_score(classify(ytest,thres,labels).astype(int),classify(model.predict(xtest),thres,labels).astype(int))
     trainScore=f1_score(classify(ytrain,thres,labels).astype(int),classify(model.predict(xtrain),thres,labels).astype(int))
-    print('Model performance for '+ nameModel)
-    print('F1-Test: ')
-    print(testScore)
-    print('F1-Train:')
-    print(trainScore)
-    print('Test Acc.:')
-    print(accuracy_score(classify(ytest,thres,labels).astype(int), classify(model.predict(xtest),thres,labels).astype(int)))
+    print('Model performance for '+ nameModel + ' F1-Test: '+ str(testScore) + ' F1-Train: '+ str(trainScore) + ' Test Acc.:' + str(accuracy_score(classify(ytest,thres,labels).astype(int), classify(model.predict(xtest),thres,labels).astype(int))) )
     return
 
 #Function to automate optimization and selection
@@ -135,6 +132,11 @@ def opt(model, scor,data,tc,params):
     return search.best_estimator_
 
 ##With DFT Data
+#Gradient Boosting
+params={'n_estimators': [10,100,1000,10000],'learning_rate':[0.01,0.05,0.1,0.15,0.2],'loss' : ['squared_error']}
+best=opt(GradientBoostingRegressor(),'r2',trainData,trainTc,params)
+modelEvalReg(best,'GradientBoosting',testTc,trainTc,testData,trainData,data,tc)
+
 #Extra Trees
 params={'n_estimators': [10,100,1000,10000],'criterion' : ['squared_error']}
 best=opt(ExtraTreesRegressor(),'r2',trainData,trainTc,params)
@@ -162,7 +164,7 @@ best=opt(DecisionTreeRegressor(),'r2',trainData,trainTc,params)
 modelEvalReg(best,'Decision Tree',testTc,trainTc,testData,trainData,data,tc)
 
 #KNN
-params={'n_neighbors':[2,3,4,5,6,10,15],'p':[1,2,3,4],'leaf_size': [5,10,20,30,40,50,60,70]}
+params={'n_neighbors':[2,3,4,5,6,10,15,20,25,30,40,50],'p':[1,2,3,4],'leaf_size': [5,10,20,30,40,50,60,70]}
 best=opt(KNN(),'r2',trainData,trainTc,params)
 modelEvalReg(best,'KNN',testTc,trainTc,testData,trainData,data,tc)
 
@@ -246,7 +248,7 @@ plt.clf()
 print('LASSOLars test plot generated.')
 
 #Histogram of Atomic #
-dataOccup=data[:,59:63]
+dataOccup=data[:,np.where(descr=='Atomic Numbers of Atom 1'):np.where(descr=='Atomic Numbers of Atom 1')+4]
 dataOccup=pd.DataFrame(data=dataOccup, columns=['Site 1', 'Site 2', 'Site 3', 'Site 4'])
 sns.set_theme(style="ticks")
 f, ax = plt.subplots(figsize=(10, 5))
@@ -259,7 +261,7 @@ discrete=True,
     edgecolor=".3",
     linewidth=.5,
     log_scale=False,
-    bins=int(np.max(data[:,59:63])),
+    bins=int(np.max(data[:,np.where(descr=='Atomic Numbers of Atom 1'):np.where(descr=='Atomic Numbers of Atom 1')+4])),
 )
 ax.set(xlabel='Atomic Number')
 plt.grid()
@@ -275,7 +277,7 @@ reg.fit(data, tc)
 print("Score using 5-Fold CV on WHOLE data set: %f" %np.mean(cross_val_score(reg,data,tc,cv=5,scoring='r2')))
 coef = pd.Series(reg.coef_, index = X.columns)
 print("Lasso picked " + str(sum(coef != 0)) + " variables and eliminated " +  str(sum(coef == 0)) + " variables")
-f,ax1=plt.subplot(figsize=(10, 5))
+ax1=plt.subplot()
 reg_coef, descr = zip(*sorted(zip(coef, descr)))
 descr=np.array(descr)
 for i in range (0,len(descr)):
@@ -287,8 +289,6 @@ exist=np.zeros(0,dtype=int)
 for i in range (0,len(reg_coef)):
     if np.abs(reg_coef.iloc[i])>0.0001:
         exist=np.append(exist,int(i))
-print('Feature Coeffs:')
-print(reg_coef[exist])
 reg_coef.iloc[exist].plot(kind = "barh")
 ax1.set_yticklabels(descr[exist])
 plt.grid()
@@ -300,9 +300,9 @@ print('Feature importance plot generated.')
 
 #Histogram of Tcs
 sns.set_theme(style="whitegrid")
-f, ax = plt.subplots(figsize=(7, 5))
+f, ax = plt.subplots(figsize=(10, 5))
 sns.despine(f)
-yHist1=pd.DataFrame.from_records([testTc,tcORIG],['Test $T_c$','$T_c$'])
+yHist1=pd.DataFrame.from_records([testTc,tcORIG],['Test set $T_c$','$T_c$'])
 yHist1=yHist1.transpose()
 sns.histplot(
     data=yHist1,
@@ -310,18 +310,17 @@ sns.histplot(
     edgecolor=".3",
     linewidth=.5,binwidth=100
 )
-ax.set(xlabel='$T_c$')
+ax.set(xlabel='$T_c$ in Kelvin')
 sns.color_palette("blend:#7AB,#EDA", as_cmap=True)
 plt.savefig('TcHist.png',dpi=1200)
 plt.clf()
-print('Tc Histogram generated')
-
 
 ##Confusion Matrices
 #Indirect via ETR
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),classify(ETR.predict(testData),thres,labels).astype(str),labels=['0','1'])
 cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
+plt.grid()
 plt.savefig('ConfIndETR.png')
 plt.clf()
 
@@ -329,17 +328,26 @@ plt.clf()
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),classify(LL.predict(testData),thres,labels).astype(str),labels=['0','1'])
 cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
+plt.grid()
 plt.savefig('ConfIndLL.png')
 
 #Direct via ETC
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),ETC.predict(testData).astype(str),labels=['0','1'])
 cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
+plt.grid()
 plt.savefig('ConfDirETC.png')
 
 ##Without DFT
 #Shuffle and split data
-trainData,testData,trainTc,testTc=train_test_split(dataNoDFT,tc,test_size=0.2,shuffle=True ,random_state=31415)
+trainData,testData,trainTc,testTc=train_test_split(dataNoDFT,tc,test_size=0.2,shuffle=True ,random_state=randomSeed)
+
+#Scaling 
+scalerNoDFT=StandardScaler()
+scalerNoDFT.fit(trainData)
+trainData=scalerNoDFT.transform(trainData)
+testData=scalerNoDFT.transform(testData)
+
 #Extra Trees
 params={'n_estimators': [10,100,1000,10000],'criterion' : ['squared_error']}
 best=opt(ExtraTreesRegressor(),'r2',trainData,trainTc,params)
@@ -411,6 +419,7 @@ modelEvalIndClass(ETR,'Indirect ETR Class no DFT data',testTc,trainTc,testData,t
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),classify(ETR.predict(testData),thres,labels).astype(str),labels=['0','1'])
 cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
+plt.grid()
 plt.savefig('ConfIndETRNoDFT.png')
 plt.clf()
 
@@ -418,10 +427,12 @@ plt.clf()
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),classify(LL.predict(testData),thres,labels).astype(str),labels=['0','1'])
 cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
+plt.grid()
 plt.savefig('ConfIndLLNoDFT.png')
 
 #Direct via ETC
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),ETC.predict(testData).astype(str),labels=['0','1'])
 cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
+plt.grid()
 plt.savefig('ConfDirETCNoDFT.png')
