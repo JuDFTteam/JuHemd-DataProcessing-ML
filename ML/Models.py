@@ -97,7 +97,7 @@ def modelEvalClass(model,nameModel,ytest,ytrain,xtest,xtrain,data,tc):
     cv=cross_val_score(model,xtrain,ytrain.astype(int),cv=5,scoring='f1')
     testScore=f1_score(ytest.astype(int),model.predict(xtest).astype(int))
     trainScore=f1_score(ytrain.astype(int),model.predict(xtrain).astype(int))
-    print('Model performance for '+ nameModel + ' CV: '+ str(np.mean(cv))+' F1-Test: '+ str(testScore)+ ' F1-Train: ' + str(trainScore) + ' Test Acc.: ' + str(accuracy_score(ytest, model.predict(xtest)))  
+    print('Model performance for '+ nameModel + ' CV: '+ str(np.mean(cv))+' F1-Test: '+ str(testScore)+ ' F1-Train: ' + str(trainScore) + ' Test Acc.: ' + str(accuracy_score(ytest, model.predict(xtest))))  
     return
 
 #Classif Func
