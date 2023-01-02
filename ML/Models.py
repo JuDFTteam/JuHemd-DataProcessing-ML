@@ -249,8 +249,8 @@ plt.clf()
 print('LASSOLars test plot generated.')
 
 #Histogram of Atomic #
-print(str(np.where(descr=='Atomic Numbers of Atom 1') )+str(np.where(descr=='Atomic Numbers of Atom 1')))
-dataOccup=data[:,np.where(descr=='Atomic Numbers of Atom 1')[0]:np.where(descr=='Atomic Numbers of Atom 1')[0]+4]
+print(str(np.where(descr=='Atomic Numbers of Atom 1')[0][0] )+str(np.where(descr=='Atomic Numbers of Atom 1')))
+dataOccup=data[:,np.where(descr=='Atomic Numbers of Atom 1')[0][0]:np.where(descr=='Atomic Numbers of Atom 1')[0][0]+4]
 dataOccup=pd.DataFrame(data=dataOccup, columns=['Site 1', 'Site 2', 'Site 3', 'Site 4'])
 sns.set_theme(style="ticks")
 f, ax = plt.subplots(figsize=(10, 5))
