@@ -262,7 +262,7 @@ discrete=True,
     edgecolor=".3",
     linewidth=.5,
     log_scale=False,
-    bins=int(np.max(data[:,np.where(descr=='Atomic Numbers of Atom 1'):np.where(descr=='Atomic Numbers of Atom 1')+4])),
+    bins=int(np.max(data[:,np.where(descr=='Atomic Numbers of Atom 1')[0][0]:np.where(descr=='Atomic Numbers of Atom 1')[0][0]+4])),
 )
 ax.set(xlabel='Atomic Number')
 plt.grid()
