@@ -65,7 +65,7 @@ def meaninglessFeaturesRemoval(data):
 #Remove meaningless columns
 data,indices=meaninglessFeaturesRemoval(data)
 print('Number of zero variance descriptors which are removed: %i'%int(len(indices)))
-descr=np.delete(descr,obj= indices,axis=0)
+descr=np.delete(descr,obj= indices,axis=0).astype('U100')
 
 #Outlier removal
 tcORIG=tc
@@ -136,33 +136,33 @@ def opt(model, scor,data,tc,params):
 #Gradient Boosting
 params={'n_estimators': [10,100,1000,10000],'learning_rate':[0.01,0.05,0.1,0.15,0.2],'loss' : ['squared_error']}
 best=opt(GradientBoostingRegressor(),'r2',trainData,trainTc,params)
-modelEvalReg(best,'GradientBoosting',testTc,trainTc,testData,trainData,data,tc)
+modelEvalReg(best,'GradientBoostingReg',testTc,trainTc,testData,trainData,data,tc)
 
 #Extra Trees
 params={'n_estimators': [10,100,1000,10000],'criterion' : ['squared_error']}
 best=opt(ExtraTreesRegressor(),'r2',trainData,trainTc,params)
 ETR=best#Save for ind. Class later
-modelEvalReg(best,'ExtraTrees',testTc,trainTc,testData,trainData,data,tc)
+modelEvalReg(best,'ExtraTreesReg',testTc,trainTc,testData,trainData,data,tc)
 
 #LassoLars
 best=linear_model.LassoLarsCV(max_iter=100000,  cv=5, max_n_alphas=100000, eps=1e-16, copy_X=True)
 LL=best#Save for ind. Class later
 LL.fit(trainData,trainTc)
-modelEvalReg(best,'LassoLars',testTc,trainTc,testData,trainData,data,tc)
+modelEvalReg(best,'LassoLarsReg',testTc,trainTc,testData,trainData,data,tc)
 
 #Lasso
 best=linear_model.LassoCV(eps=0.00001, n_alphas=1000, precompute='auto', max_iter=10000, tol=0.00001,cv=5)
 reg=best#Save for Feature Importance
-modelEvalReg(best,'Lasso',testTc,trainTc,testData,trainData,data,tc)
+modelEvalReg(best,'LassoReg',testTc,trainTc,testData,trainData,data,tc)
 
 #LinReg
 best=LinearRegression()
-modelEvalReg(best,'Lin Reg.',testTc,trainTc,testData,trainData,data,tc)
+modelEvalReg(best,'LinReg',testTc,trainTc,testData,trainData,data,tc)
 
 #DTR
 params={'criterion' : ['squared_error'], 'max_features':['sqrt','log2','auto']}
 best=opt(DecisionTreeRegressor(),'r2',trainData,trainTc,params)
-modelEvalReg(best,'Decision Tree',testTc,trainTc,testData,trainData,data,tc)
+modelEvalReg(best,'DecisionTreeReg',testTc,trainTc,testData,trainData,data,tc)
 
 #KNN
 params={'n_neighbors':[2,3,4,5,6,10,15,20,25,30,40,50],'p':[1,2,3,4],'leaf_size': [5,10,20,30,40,50,60,70]}
@@ -172,7 +172,7 @@ modelEvalReg(best,'KNN',testTc,trainTc,testData,trainData,data,tc)
 #RTR
 params={'n_estimators': [10,100,1000,10000],'criterion' : ['squared_error']}
 best=opt(RandomForestRegressor(),'r2',trainData,trainTc,params)
-modelEvalReg(best,'RTR',testTc,trainTc,testData,trainData,data,tc)
+modelEvalReg(best,'RandomTreesReg',testTc,trainTc,testData,trainData,data,tc)
 
 ##Move To classification
 #Prerequisites
@@ -186,23 +186,23 @@ TcClass= classify(tc,thres,labels).astype(int)
 params={'n_estimators': [10000],'criterion': ['gini']}
 best=opt(ExtraTreesClassifier(),'f1',trainData,trainTcClass,params)
 ETC=best
-modelEvalClass(best,'ETC',testTcClass,trainTcClass,testData,trainData,data,TcClass)
+modelEvalClass(best,'ExtraTressClass',testTcClass,trainTcClass,testData,trainData,data,TcClass)
 
 #DTC
 params={ 'max_features':['sqrt','log2','auto']}
 best=opt(DecisionTreeClassifier(),'f1',trainData,trainTcClass,params)
-modelEvalClass(best,'DTC',testTcClass,trainTcClass,testData,trainData,data,TcClass)
+modelEvalClass(best,'DecisionTreeClass',testTcClass,trainTcClass,testData,trainData,data,TcClass)
 
 #LogReg
 params={'penalty':['l1', 'l2', 'elasticnet'], 'C':[0.1,0.5,1],'solver': ['liblinear','saga']}
 best=opt(LogisticRegression(),'f1',trainData,trainTcClass,params)
-modelEvalClass(best,'Logistic',testTcClass,trainTcClass,testData,trainData,data,TcClass)
+modelEvalClass(best,'LogisticReg',testTcClass,trainTcClass,testData,trainData,data,TcClass)
 
 #Ind LassoLars
-modelEvalIndClass(LL,'Indirect LASSOLars Class',testTc,trainTc,testData,trainData,data,tc)
+modelEvalIndClass(LL,'IndirectLASSOLarsClass',testTc,trainTc,testData,trainData,data,tc)
 
 #Ind ETR
-modelEvalIndClass(ETR,'Indirect ETR Class',testTc,trainTc,testData,trainData,data,tc)
+modelEvalIndClass(ETR,'IndirectETRClass',testTc,trainTc,testData,trainData,data,tc)
 
 ##Figure generation
 #testTc ETR
@@ -272,9 +272,13 @@ plt.clf()
 print('Histogram generated.')
 
 #Feature Importance using LASSO
-X=pd.DataFrame(data)
+scaler2=StandardScaler()
+scaler2.fit(data)
+LData=scaler2.transform(data)
+X=pd.DataFrame(LData)
 y=pd.DataFrame(tc)
-reg.fit(data, tc)
+reg.fit(LData, tc)
+print("Score using 5-Fold CV on WHOLE data set: %f" %np.mean(cross_val_score(reg,LData,tc,cv=5,scoring='r2')))
 coef = pd.Series(reg.coef_, index = X.columns)
 print("Lasso picked " + str(sum(coef != 0)) + " variables and eliminated " +  str(sum(coef == 0)) + " variables")
 ax1=plt.subplot()
@@ -352,26 +356,26 @@ testData=scalerNoDFT.transform(testData)
 params={'n_estimators': [10,100,1000,10000],'criterion' : ['squared_error']}
 best=opt(ExtraTreesRegressor(),'r2',trainData,trainTc,params)
 ETR=best#Save for ind. Class later
-modelEvalReg(best,'ExtraTrees no DFT data',testTc,trainTc,testData,trainData,data,tc)
+modelEvalReg(best,'ExtraTreesReg no DFT data',testTc,trainTc,testData,trainData,data,tc)
 
 #LassoLars
 best=linear_model.LassoLarsCV( max_iter=100000,  cv=5, max_n_alphas=100000, eps=1e-16, copy_X=True)
 LL=best#Save for ind. Class later
 LL.fit(trainData,trainTc)
-modelEvalReg(best,'LassoLars no DFT data',testTc,trainTc,testData,trainData,data,tc)
+modelEvalReg(best,'LassoLarsReg no DFT data',testTc,trainTc,testData,trainData,data,tc)
 
 #Lasso
-best=linear_model.LassoCV(eps=0.00001, n_alphas=10000, precompute='auto', max_iter=1000000, tol=0.00001,cv=5)
-modelEvalReg(best,'Lasso no DFT data',testTc,trainTc,testData,trainData,data,tc)
+best=linear_model.LassoCV(eps=0.00001, n_alphas=1000, precompute='auto', max_iter=10000, tol=0.00001,cv=5)
+modelEvalReg(best,'LassoReg no DFT data',testTc,trainTc,testData,trainData,data,tc)
 
 #LinReg
 best=LinearRegression()
-modelEvalReg(best,'Lin Reg.',testTc,trainTc,testData,trainData,data,tc)
+modelEvalReg(best,'LinReg',testTc,trainTc,testData,trainData,data,tc)
 
 #DTR
 params={'criterion' : ['squared_error'], 'max_features':['sqrt','log2','auto']}
 best=opt(DecisionTreeRegressor(),'r2',trainData,trainTc,params)
-modelEvalReg(best,'Decision Tree no DFT data',testTc,trainTc,testData,trainData,data,tc)
+modelEvalReg(best,'DecisionTreeReg no DFT data',testTc,trainTc,testData,trainData,data,tc)
 
 #KNN
 params={'n_neighbors':[2,3,4,5,6,10,15],'p':[1,2,3,4],'leaf_size': [5,10,20,30,40,50,60,70]}
@@ -381,7 +385,7 @@ modelEvalReg(best,'KNN no DFT data',testTc,trainTc,testData,trainData,data,tc)
 #RTR
 params={'n_estimators': [10,100,1000,10000],'criterion' : ['squared_error']}
 best=opt(RandomForestRegressor(),'r2',trainData,trainTc,params)
-modelEvalReg(best,'RTR no DFT data',testTc,trainTc,testData,trainData,data,tc)
+modelEvalReg(best,'RandomTreesReg no DFT data',testTc,trainTc,testData,trainData,data,tc)
 
 ##Move To classification
 #Prerequisites
@@ -395,12 +399,12 @@ TcClass= classify(tc,thres,labels).astype(int)
 params={'n_estimators': [10000],'criterion': ['gini']}
 best=opt(ExtraTreesClassifier(),'f1',trainData,trainTcClass,params)
 ETC=best# For confu Matrix later
-modelEvalClass(best,'ETC no DFT data',testTcClass,trainTcClass,testData,trainData,data,TcClass)
+modelEvalClass(best,'ExtraTreesClas no DFT data',testTcClass,trainTcClass,testData,trainData,data,TcClass)
 
 #DTC
 params={ 'max_features':['sqrt','log2','auto']}
 best=opt(DecisionTreeClassifier(),'f1',trainData,trainTcClass,params)
-modelEvalClass(best,'DTC no DFT data',testTcClass.astype(int),trainTcClass.astype(int),testData,trainData,data,TcClass.astype(int))
+modelEvalClass(best,'DescisionTreesClass no DFT data',testTcClass.astype(int),trainTcClass.astype(int),testData,trainData,data,TcClass.astype(int))
 
 #LogReg
 params={'penalty':['l1', 'l2', 'elasticnet'], 'C':[0.1,0.5,1],'solver': ['liblinear','saga']}
@@ -408,10 +412,10 @@ best=opt(LogisticRegression(),'f1',trainData,trainTcClass,params)
 modelEvalClass(best,'Logistic no DFT data',testTcClass.astype(int),trainTcClass.astype(int),testData,trainData,data,TcClass.astype(int))
 
 #Ind LassoLars
-modelEvalIndClass(LL,'Indirect LASSOLars Class no DFT data',testTc,trainTc,testData,trainData,data,tc)
+modelEvalIndClass(LL,'IndirectLASSOLarsClass no DFT data',testTc,trainTc,testData,trainData,data,tc)
 
 #Ind ETR
-modelEvalIndClass(ETR,'Indirect ETR Class no DFT data',testTc,trainTc,testData,trainData,data,tc)
+modelEvalIndClass(ETR,'IndirectETR Class no DFT data',testTc,trainTc,testData,trainData,data,tc)
 
 
 ##Confusion Matrices
