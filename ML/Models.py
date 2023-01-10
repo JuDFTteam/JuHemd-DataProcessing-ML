@@ -49,7 +49,7 @@ path=input('Enter valid path to files with Heuslers Data (Descriptors.txt ,Tc.tx
 try:
     tc = np.genfromtxt(path+'/Tc.txt')
     data = np.genfromtxt(path+'/Data.txt')[:, 1:]
-    descr=np.genfromtxt(path+'/Descriptors.txt',dtype=str,delimiter=',',comments='$')[1:]
+    descr=np.genfromtxt(path+'/Descriptors.txt',dtype=str,delimiter=',',comments='$')[1:].astype('U100')
     dataNoDFT=np.genfromtxt(path+'/DataClearedFromDTF.txt')[:, 1:]
     print('Path Found')
 except:
@@ -63,6 +63,8 @@ def meaninglessFeaturesRemoval(data):
   return np.delete(data,obj=indices,axis=1), indices
 
 #Remove meaningless columns
+dataOrig=data
+descrOrig=descr
 data,indices=meaninglessFeaturesRemoval(data)
 print('Number of zero variance descriptors which are removed: %i'%int(len(indices)))
 descr=np.delete(descr,obj= indices,axis=0).astype('U100')
@@ -89,7 +91,7 @@ def modelEvalReg(model,nameModel,ytest,ytrain,xtest,xtrain,data,tc):
     cv=cross_val_score(model,trainData,trainTc,cv=5,scoring='r2')
     testScore=r2_score(ytest,model.predict(xtest))
     trainScore=r2_score(ytrain,model.predict(xtrain))
-    print('Model performance for '+ nameModel + ' CV: ' +  str(np.mean(cv)) + ' R2-Test: ' + str(testScore) + ' R2-Train: ' + str(trainScore) )
+    print('Model performance for '+ nameModel + ' CV: ' +  str(np.round(np.mean(cv),5)) + ' R2-Test: ' + str(np.round(testScore,5)) + ' R2-Train: ' + str(np.round(trainScore ,5)))
     return
 
 #Evaluation function for classification models
@@ -98,7 +100,7 @@ def modelEvalClass(model,nameModel,ytest,ytrain,xtest,xtrain,data,tc):
     cv=cross_val_score(model,xtrain,ytrain.astype(int),cv=5,scoring='f1')
     testScore=f1_score(ytest.astype(int),model.predict(xtest).astype(int))
     trainScore=f1_score(ytrain.astype(int),model.predict(xtrain).astype(int))
-    print('Model performance for '+ nameModel + ' CV: '+ str(np.mean(cv))+' F1-Test: '+ str(testScore)+ ' F1-Train: ' + str(trainScore) + ' Test Acc.: ' + str(accuracy_score(ytest, model.predict(xtest))))  
+    print('Model performance for '+ nameModel + ' CV: '+ str(np.round(np.mean(cv),5))+' F1-Test: '+ str(np.round(testScore,5))+ ' F1-Train: ' + str(np.round(trainScore,5)) + ' Test Acc.: ' + str(np.round(accuracy_score(ytest, model.predict(xtest)),5)))
     return
 
 #Classif Func
@@ -123,7 +125,7 @@ def modelEvalIndClass(model,nameModel,ytest,ytrain,xtest,xtrain,data,tc):
     model.fit(xtrain,ytrain)
     testScore=f1_score(classify(ytest,thres,labels).astype(int),classify(model.predict(xtest),thres,labels).astype(int))
     trainScore=f1_score(classify(ytrain,thres,labels).astype(int),classify(model.predict(xtrain),thres,labels).astype(int))
-    print('Model performance for '+ nameModel + ' F1-Test: '+ str(testScore) + ' F1-Train: '+ str(trainScore) + ' Test Acc.:' + str(accuracy_score(classify(ytest,thres,labels).astype(int), classify(model.predict(xtest),thres,labels).astype(int))) )
+    print('Model performance for '+ nameModel + ' F1-Test: '+ str(np.round(testScore,5)) + ' F1-Train: '+ str(np.round(trainScore,5)) + ' Test Acc.:' + str(np.round(accuracy_score(classify(ytest,thres,labels).astype(int), classify(model.predict(xtest),thres,labels).astype(int)),5)) )
     return
 
 #Function to automate optimization and selection
@@ -273,28 +275,28 @@ print('Histogram generated.')
 
 #Feature Importance using LASSO
 scaler2=StandardScaler()
-scaler2.fit(data)
-LData=scaler2.transform(data)
-X=pd.DataFrame(LData)
+scaler2.fit(dataOrig)
+LData=scaler2.transform(dataOrig)
+X=pd.DataFrame(dataOrig)
 y=pd.DataFrame(tc)
 reg.fit(LData, tc)
-print("Score using 5-Fold CV on WHOLE data set: %f" %np.mean(cross_val_score(reg,LData,tc,cv=5,scoring='r2')))
+print("Score using 5-Fold CV on WHOLE data set: %f" %np.round(np.mean(cross_val_score(reg,dataOrig,tc,cv=5,scoring='r2'),2)))
 coef = pd.Series(reg.coef_, index = X.columns)
 print("Lasso picked " + str(sum(coef != 0)) + " variables and eliminated " +  str(sum(coef == 0)) + " variables")
 ax1=plt.subplot()
-reg_coef, descr = zip(*sorted(zip(coef, descr)))
-descr=np.array(descr)
-for i in range (0,len(descr)):
-    descr[i]=descr[i].replace('#','\#')
+reg_coef, descrOrig = zip(*sorted(zip(coef, descrOrig)))
+for i in range (0,len(descrOrig)):
+    descrOrig[i]=descrOrig[i].replace('#','\#')
+    descrOrig[i]=descrOrig[i].replace('_',' ')
+descrOrig=descrOrig.astype('U100')
 reg_coef=pd.Series(reg_coef,index = X.columns)
 mpl.rcParams['figure.figsize'] = (8.0, 10.0)
-#exist=np.where(np.abs(reg_coef)>0.01)[0]
 exist=np.zeros(0,dtype=int)
 for i in range (0,len(reg_coef)):
     if np.abs(reg_coef.iloc[i])>0.0001:
         exist=np.append(exist,int(i))
 reg_coef.iloc[exist].plot(kind = "barh")
-ax1.set_yticklabels(descr[exist])
+ax1.set_yticklabels(descrOrig[exist].astype('U100'))
 plt.grid()
 plt.xlabel('Coefficient Weight')
 plt.tight_layout()
@@ -318,6 +320,7 @@ ax.set(xlabel='$T_c$ in Kelvin')
 sns.color_palette("blend:#7AB,#EDA", as_cmap=True)
 plt.savefig('TcHist.png',dpi=1200)
 plt.clf()
+print('Tcs Histogram generated.')
 
 ##Confusion Matrices
 #Indirect via ETR
