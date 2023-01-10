@@ -62,19 +62,19 @@ def meaninglessFeaturesRemoval(data):
     if np.all(data[:,i]==data[0,i]): indices=np.append(indices,int(i))
   return np.delete(data,obj=indices,axis=1), indices
 
+#Outlier removal
+ind=np.where(tc>1400.0)
+data=np.delete(data,obj=ind, axis=0)
+dataNoDFT=np.delete(dataNoDFT,obj=ind, axis=0)
+tcORIG=tc
+tc=np.delete(tc,ind)
+
 #Remove meaningless columns
 dataOrig=data
 descrOrig=descr
 data,indices=meaninglessFeaturesRemoval(data)
 print('Number of zero variance descriptors which are removed: %i'%int(len(indices)))
 descr=np.delete(descr,obj= indices,axis=0).astype('U100')
-
-#Outlier removal
-tcORIG=tc
-ind=np.where(tc>1400.0)
-data=np.delete(data,obj=ind, axis=0)
-dataNoDFT=np.delete(dataNoDFT,obj=ind, axis=0)
-tc=np.delete(tc,ind)
 
 #Split and shuffle data
 trainData,testData,trainTc,testTc=train_test_split(data,tc,test_size=0.2,shuffle=True ,random_state=randomSeed)
@@ -280,7 +280,7 @@ LData=scaler2.transform(dataOrig)
 X=pd.DataFrame(dataOrig)
 y=pd.DataFrame(tc)
 reg.fit(LData, tc)
-print("Score using 5-Fold CV on WHOLE data set: %f" %np.round(np.mean(cross_val_score(reg,dataOrig,tc,cv=5,scoring='r2'),2)))
+print("Score using 5-Fold CV on WHOLE data set: %f" %np.round(np.mean(cross_val_score(reg,dataOrig,tc,cv=5,scoring='r2')),2))
 coef = pd.Series(reg.coef_, index = X.columns)
 print("Lasso picked " + str(sum(coef != 0)) + " variables and eliminated " +  str(sum(coef == 0)) + " variables")
 ax1=plt.subplot()
