@@ -69,12 +69,15 @@ dataNoDFT=np.delete(dataNoDFT,obj=ind, axis=0)
 tcORIG=tc
 tc=np.delete(tc,ind)
 
-#Remove meaningless columns
+##Remove meaningless columns
+#For DFT data
 dataOrig=data
 descrOrig=descr
 data,indices=meaninglessFeaturesRemoval(data)
 print('Number of zero variance descriptors which are removed: %i'%int(len(indices)))
 descr=np.delete(descr,obj= indices,axis=0).astype('U100')
+#For non DFT data
+dataNoDFT,indices=meaninglessFeaturesRemoval(dataNoDFT)
 
 #Split and shuffle data
 trainData,testData,trainTc,testTc=train_test_split(data,tc,test_size=0.2,shuffle=True ,random_state=randomSeed)
@@ -185,7 +188,7 @@ trainTcClass= classify(trainTc,thres,labels).astype(int)
 TcClass= classify(tc,thres,labels).astype(int)
 
 #ETC
-params={'n_estimators': [10000],'criterion': ['gini']}
+params={'n_estimators': [10000,10000,10000,10000,10000],'criterion': ['gini']}
 best=opt(ExtraTreesClassifier(),'f1',trainData,trainTcClass,params)
 ETC=best
 modelEvalClass(best,'ExtraTressClass',testTcClass,trainTcClass,testData,trainData,data,TcClass)
@@ -397,10 +400,10 @@ trainTcClass= classify(trainTc,thres,labels).astype(int)
 TcClass= classify(tc,thres,labels).astype(int)
 
 #ETC
-params={'n_estimators': [10000],'criterion': ['gini']}
+params={'n_estimators': [10000,10000,10000,10000,10000],'criterion': ['gini']}
 best=opt(ExtraTreesClassifier(),'f1',trainData,trainTcClass,params)
 ETC=best# For confu Matrix later
-modelEvalClass(best,'ExtraTreesClas no DFT data',testTcClass,trainTcClass,testData,trainData,data,TcClass)
+modelEvalClass(best,'ExtraTreesClass no DFT data',testTcClass,trainTcClass,testData,trainData,data,TcClass)
 
 #DTC
 params={ 'max_features':['sqrt','log2','auto']}
@@ -417,7 +420,6 @@ modelEvalIndClass(LL,'IndirectLASSOLarsClass no DFT data',testTc,trainTc,testDat
 
 #Ind ETR
 modelEvalIndClass(ETR,'IndirectETR Class no DFT data',testTc,trainTc,testData,trainData,data,tc)
-
 
 ##Confusion Matrices
 #Indirect via ETR
