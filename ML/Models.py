@@ -355,6 +355,12 @@ scalerNoDFT=StandardScaler()
 scalerNoDFT.fit(trainData)
 trainData=scalerNoDFT.transform(trainData)
 testData=scalerNoDFT.transform(testData)
+data=dataNoDFT
+
+#Gradient Boosting
+params={'n_estimators': [10,100,1000,10000],'learning_rate':[0.01,0.05,0.1,0.15,0.2],'loss' : ['squared_error']}
+best=opt(GradientBoostingRegressor(),'r2',trainData,trainTc,params)
+modelEvalReg(best,'GradientBoostingReg no DFT data',testTc,trainTc,testData,trainData,data,tc)
 
 #Extra Trees
 params={'n_estimators': [10,100,1000,10000],'criterion' : ['squared_error']}
