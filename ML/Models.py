@@ -236,10 +236,23 @@ ul = conf.upper
 plt.plot(x_z, lowess,color='r')
 plt.fill_between(x_z,ll,ul,alpha=.33)
 plt.xlabel("Test $T_c$ in Kelvin")
-plt.ylabel("$\\frac{T_c^{Pred}-T_c}{T_c}$")
+plt.rcParams.update({'axes.labelsize':15})
+plt.ylabel("$\\displaystyle\\frac{T_c^{Pred}-T_c}{T_c}$",fontsize=15)
+plt.tight_layout()
 plt.savefig("ResidETR.png",dpi=1200)
 plt.clf()
 print('ETR residues plot generated.')
+plt.rcParams.update({'axes.labelsize':10})
+
+#Mabs + Tc plot
+
+sns.set_theme(style='whitegrid')
+h=sns.jointplot(x=data[:,np.where(descr=='mAbs')[0][0]],y=tc)
+h.set_axis_labels('$\\displaystyle M_{Abs}$','$\\displaystyle T_c$')
+plt.tight_layout()
+plt.savefig('TcvsM.png',dpi=600)
+plt.clf()
+print('T_c vs M_abs plot generated.')
 
 #Test Tc LASSOLars
 pred=LL.predict(testData)
