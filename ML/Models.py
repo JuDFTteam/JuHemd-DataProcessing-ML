@@ -38,6 +38,8 @@ import seaborn as sns
 plt.rcParams['text.usetex'] = True
 mpl.rcParams['font.family'] = ['Arial']
 from skmisc.loess import loess
+#Feature Imp
+import shap
 
 #Set random seed for reproducible results
 randomSeed=31415
@@ -313,32 +315,22 @@ plt.savefig("Hist.png",dpi=1200)
 plt.clf()
 print('Histogram generated.')
 
-#Feature Importance using LASSO
-X=pd.DataFrame(dataOrig)
-y=pd.DataFrame(tc)
-reg.fit(dataOrig, tc)
-print("Score using 5-Fold CV on WHOLE data set: %f" %np.round(np.mean(cross_val_score(reg,dataOrig,tc,cv=5,scoring='r2')),2))
-coef = pd.Series(reg.coef_, index = X.columns)
-print("Lasso picked " + str(sum(coef != 0)) + " variables and eliminated " +  str(sum(coef == 0)) + " variables")
-ax1=plt.subplot()
-reg_coef, descrOrig = zip(*sorted(zip(coef, descrOrig)))
-descrOrig=np.array(descrOrig).astype('U100')
-for i in range (0,len(descrOrig)):
-    descrOrig[i]=descrOrig[i].replace('#','\#')
-    descrOrig[i]=descrOrig[i].replace('_',' ')
-descrOrig=descrOrig.astype('U100')
-reg_coef=pd.Series(reg_coef,index = X.columns)
-mpl.rcParams['figure.figsize'] = (8.0, 10.0)
-exist=np.zeros(0,dtype=int)
-for i in range (0,len(reg_coef)):
-    if np.abs(reg_coef.iloc[i])>0.0001:
-        exist=np.append(exist,int(i))
-reg_coef.iloc[exist].plot(kind = "barh")
-ax1.set_yticklabels(descrOrig[exist].astype('U100'))
-plt.grid()
-plt.xlabel('Coefficient Weight')
+#Feature Importance using SHAP
+for i in range (0,len(descr)):
+    descr[i]=descr[i].replace('#','\#')
+    descr[i]=descr[i].replace('_',' ')
+X=pd.DataFrame(trainData,columns=descr)
+explainer=shap.TreeExplainer(ETR,X)
+shap_values=explainer(X)
+shap.plots.bar(shap_values,show=False)
+plt.xlabel('Mean SHAP Value')
 plt.tight_layout()
-plt.savefig("FeatureImportance.png",dpi=600)
+plt.savefig('MeanSHAP.png',dpi=1200)
+plt.clf()
+shap.summary_plot(shap_values,show=False)
+plt.xlabel('SHAP Value')
+plt.tight_layout()
+plt.savefig('SHAP.png',dpi=1200)
 plt.clf()
 print('Feature importance plot generated.')
 
