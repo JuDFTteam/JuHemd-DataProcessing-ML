@@ -317,8 +317,18 @@ print('Histogram generated.')
 
 #Feature Importance using SHAP
 for i in range (0,len(descr)):
+    descr[i]=descr[i].replace('Density Param for Atom # 27','Cobalt Density')
     descr[i]=descr[i].replace('#','\#')
+    descr[i]=descr[i].replace('atom','Atom')
     descr[i]=descr[i].replace('_',' ')
+    descr[i]=descr[i].replace('mAbs','$|M|$')
+    descr[i]=descr[i].replace('AbsM1','$|M_1|$')
+    descr[i]=descr[i].replace('mTot','$M$')
+    descr[i]=descr[i].replace('M1','$M_1$')
+    descr[i]=descr[i].replace('AbsM3','$|M_3|$')
+    descr[i]=descr[i].replace('M3','$M_3$')
+    descr[i]=descr[i].replace('Magn State','Mangetic State')
+
 X=pd.DataFrame(trainData,columns=descr)
 explainer=shap.TreeExplainer(ETR,X)
 shap_values=explainer(X)
@@ -330,7 +340,13 @@ plt.clf()
 shap.summary_plot(shap_values,show=False)
 plt.xlabel('SHAP Value')
 plt.tight_layout()
-plt.savefig('SHAP.png',dpi=1200)
+plt.savefig('TotSHAP.png',dpi=1200)
+plt.clf()
+
+shap.summary_plot(shap_values,show=False,max_display=9)
+plt.xlabel('SHAP Value')
+plt.tight_layout()
+plt.savefig('RedSHAP.png',dpi=1200)
 plt.clf()
 print('Feature importance plot generated.')
 
