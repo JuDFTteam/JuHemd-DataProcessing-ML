@@ -1,10 +1,10 @@
 #This script uses processed JuHemd data to train ML-Models to make qualitative and quantitative predictions of a test Tc set.
 #Different ML models are compared using a GridSearch algorithm, CV scores, test and train scores and - in the classification case - accuracies.
 #Mutliple figures are generated for the purpose of displaying model performance and properties of the data.
-#- Robin Hilgers, 2022
+#- Robin Hilgers, 2022-2023
 #Published on Zenodo
 #--------------------------------------------------------------------------------
-# Copyright (c) 2022 Peter Grünberg Institut, Forschungszentrum Jülich, Germany
+# Copyright (c) 2023 Peter Grünberg Institut, Forschungszentrum Jülich, Germany
 # This file is available as free software under the conditions
 # of the MIT license as expressed in the LICENSE file in more detail.
 #--------------------------------------------------------------------------------
