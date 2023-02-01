@@ -52,6 +52,7 @@ try:
     tc = np.genfromtxt(path+'/Tc.txt')
     data = np.genfromtxt(path+'/Data.txt')[:, 1:]
     descr=np.genfromtxt(path+'/Descriptors.txt',dtype=str,delimiter=',',comments='$')[1:].astype('U100')
+    descrNoDFT=np.genfromtxt(path+'/DescriptorsClearedFromDFT.txt',dtype=str,delimiter=',',comments='$')[1:].astype('U100')
     dataNoDFT=np.genfromtxt(path+'/DataClearedFromDTF.txt')[:, 1:]
     print('Path Found')
 except:
@@ -315,9 +316,10 @@ plt.savefig("Hist.png",dpi=1200)
 plt.clf()
 print('Histogram generated.')
 
-#Feature Importance using SHAP
+##Feature Importance using SHAP
+#Clean Descr Array
 for i in range (0,len(descr)):
-    descr[i]=descr[i].replace('Density Param for Atom # 27','Cobalt Density')
+    descr[i]=descr[i].replace('Density Param for atom # 27','Cobalt Density')
     descr[i]=descr[i].replace('#','\#')
     descr[i]=descr[i].replace('atom','Atom')
     descr[i]=descr[i].replace('_',' ')
@@ -329,6 +331,7 @@ for i in range (0,len(descr)):
     descr[i]=descr[i].replace('M3','$M_3$')
     descr[i]=descr[i].replace('Magn State','Mangetic State')
 
+#SHAP Beeswarm Plot (Mean SHAP Values, SHAP Values and SHAP Values for best 9 Descr.)
 X=pd.DataFrame(trainData,columns=descr)
 explainer=shap.TreeExplainer(ETR,X)
 shap_values=explainer(X)
@@ -412,6 +415,38 @@ params={'n_estimators': [10,100,1000,10000],'criterion' : ['squared_error']}
 best=opt(ExtraTreesRegressor(),'r2',trainData,trainTc,params)
 ETR=best#Save for ind. Class later
 modelEvalReg(best,'ExtraTreesReg no DFT data',testTc,trainTc,testData,trainData,data,tc)
+
+##Feature Importance using SHAP
+#Clean Descr Array
+for i in range (0,len(descrNoDFT)):
+    descrNoDFT[i]=descrNoDFT[i].replace('Density Param for atom # 27','Cobalt Density')
+    descrNoDFT[i]=descrNoDFT[i].replace('#','\#')
+    descrNoDFT[i]=descrNoDFT[i].replace('atom','Atom')
+    descrNoDFT[i]=descrdescrNoDFT[i].replace('_',' ')
+
+#SHAP Beeswarm Plot (Mean SHAP Values, SHAP Values and SHAP Values for best 9 Descr.)
+X=pd.DataFrame(trainData,columns=descrNoDFT)
+explainer=shap.TreeExplainer(ETR,X)
+shap_values=explainer(X)
+shap.plots.bar(shap_values,show=False)
+plt.xlabel('Mean SHAP Value')
+plt.tight_layout()
+plt.savefig('MeanSHAP.png',dpi=1200)
+plt.clf()
+shap.summary_plot(shap_values,show=False)
+plt.xlabel('SHAP Value')
+plt.tight_layout()
+plt.savefig('TotSHAP.png',dpi=1200)
+plt.clf()
+
+shap.summary_plot(shap_values,show=False,max_display=9)
+plt.xlabel('SHAP Value')
+plt.tight_layout()
+plt.savefig('RedSHAP.png',dpi=1200)
+plt.clf()
+print('Feature importance plot for non-DFT Features generated.')
+
+
 
 #LassoLars
 best=linear_model.LassoLarsCV( max_iter=100000,  cv=5, max_n_alphas=100000, eps=1e-16, copy_X=True)
