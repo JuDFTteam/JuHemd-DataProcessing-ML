@@ -256,10 +256,9 @@ print('ETR residues plot generated.')
 plt.rcParams.update({'axes.labelsize':10})
 
 #Mabs + Tc plot
-
 sns.set_theme(style='whitegrid')
 h=sns.jointplot(x=data[:,np.where(descr=='mAbs')[0][0]],y=tc,space = 0)
-h.set_axis_labels('$\\displaystyle M_{Abs}$','$\\displaystyle T_c$')
+h.set_axis_labels('$\\displaystyle M_{Abs}$ in $\mu_B$','$\\displaystyle T_c$ in Kelvin')
 xstd=np.std(data[:,np.where(descr=='mAbs')[0][0]])
 xmean=np.mean(data[:,np.where(descr=='mAbs')[0][0]])
 ystd=np.std(tc)
