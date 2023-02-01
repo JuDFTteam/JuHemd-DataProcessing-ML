@@ -81,6 +81,7 @@ print('Number of zero variance descriptors which are removed: %i'%int(len(indice
 descr=np.delete(descr,obj= indices,axis=0).astype('U100')
 #For non DFT data
 dataNoDFT,indices=meaninglessFeaturesRemoval(dataNoDFT)
+descrNoDFT=np.delete(descrNoDFT,obj= indices,axis=0).astype('U100')
 
 #Split and shuffle data
 trainData,testData,trainTc,testTc=train_test_split(data,tc,test_size=0.2,shuffle=True ,random_state=randomSeed)
@@ -352,21 +353,6 @@ plt.savefig('RedSHAP.png',dpi=1200)
 plt.clf()
 print('Feature importance plot generated.')
 
-##Force Plot per example (One High and one Low)
-X=pd.DataFrame(testData,columns=descr)
-shap_values=explainer(X)
-index=np.where(testTc==np.partition(testTc.flatten(), -2)[-2])[0][0]
-shap.plots.force(explainer.expected_value, shap_values.values[index,:], X.iloc[index,:],link='logit',feature_names=descr,show=False)
-plt.tight_layout()
-plt.savefig('ForceSHAPHIGH.png',dpi=1200)
-plt.clf()
-index=np.where(testTc==np.min(testTc))
-shap.force_plot(explainer.expected_value, shap_values.values[index,:], testData[index,:], link="logit",feature_names=descr,show=False)
-plt.tight_layout()
-plt.savefig('ForceSHAPLOW.png',dpi=1200)
-plt.clf()
-print('Force Plot for one high-Tc and one low-Tc generated.')
-
 #Histogram of Tcs
 sns.set_theme(style="whitegrid")
 f, ax = plt.subplots(figsize=(10, 5))
@@ -459,8 +445,6 @@ plt.tight_layout()
 plt.savefig('RedSHAP.png',dpi=1200)
 plt.clf()
 print('Feature importance plot for non-DFT Features generated.')
-
-
 
 #LassoLars
 best=linear_model.LassoLarsCV( max_iter=100000,  cv=4, max_n_alphas=100000, eps=1e-16, copy_X=True)
