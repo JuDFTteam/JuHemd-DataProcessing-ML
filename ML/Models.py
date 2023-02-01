@@ -94,7 +94,7 @@ testData=scaler.transform(testData)
 #Small functions for easy evaluation of regression models
 def modelEvalReg(model,nameModel,ytest,ytrain,xtest,xtrain,data,tc):
     model.fit(xtrain,ytrain)
-    cv=cross_val_score(model,trainData,trainTc,cv=5,scoring='r2')
+    cv=cross_val_score(model,trainData,trainTc,cv=4,scoring='r2')
     testScore=r2_score(ytest,model.predict(xtest))
     trainScore=r2_score(ytrain,model.predict(xtrain))
     print('Model performance for '+ nameModel + ' CV: ' +  str(np.round(np.mean(cv),5)) + ' R2-Test: ' + str(np.round(testScore,5)) + ' R2-Train: ' + str(np.round(trainScore ,5)))
@@ -103,7 +103,7 @@ def modelEvalReg(model,nameModel,ytest,ytrain,xtest,xtrain,data,tc):
 #Evaluation function for classification models
 def modelEvalClass(model,nameModel,ytest,ytrain,xtest,xtrain,data,tc):
     model.fit(xtrain,ytrain)
-    cv=cross_val_score(model,xtrain,ytrain.astype(int),cv=5,scoring='f1')
+    cv=cross_val_score(model,xtrain,ytrain.astype(int),cv=4,scoring='f1')
     testScore=f1_score(ytest.astype(int),model.predict(xtest).astype(int))
     trainScore=f1_score(ytrain.astype(int),model.predict(xtrain).astype(int))
     print('Model performance for '+ nameModel + ' CV: '+ str(np.round(np.mean(cv),5))+' F1-Test: '+ str(np.round(testScore,5))+ ' F1-Train: ' + str(np.round(trainScore,5)) + ' Test Acc.: ' + str(np.round(accuracy_score(ytest, model.predict(xtest)),5)))
@@ -136,7 +136,7 @@ def modelEvalIndClass(model,nameModel,ytest,ytrain,xtest,xtrain,data,tc):
 
 #Function to automate optimization and selection
 def opt(model, scor,data,tc,params):
-    search = GridSearchCV(model, params, cv=5, scoring=scor)
+    search = GridSearchCV(model, params, cv=4, scoring=scor,refit=True)
     search.fit(data, tc)
     return search.best_estimator_
 
@@ -153,13 +153,13 @@ ETR=best#Save for ind. Class later
 modelEvalReg(best,'ExtraTreesReg',testTc,trainTc,testData,trainData,data,tc)
 
 #LassoLars
-best=linear_model.LassoLarsCV(max_iter=100000,  cv=5, max_n_alphas=100000, eps=1e-16, copy_X=True)
+best=linear_model.LassoLarsCV(max_iter=100000,  cv=4, max_n_alphas=100000, eps=1e-16, copy_X=True)
 LL=best#Save for ind. Class later
 LL.fit(trainData,trainTc)
 modelEvalReg(best,'LassoLarsReg',testTc,trainTc,testData,trainData,data,tc)
 
 #Lasso
-best=linear_model.LassoCV(eps=0.00001, n_alphas=1000, precompute='auto', max_iter=10000, tol=0.00001,cv=5)
+best=linear_model.LassoCV(eps=0.00001, n_alphas=1000, precompute='auto', max_iter=10000, tol=0.00001,cv=4)
 reg=best#Save for Feature Importance
 modelEvalReg(best,'LassoReg',testTc,trainTc,testData,trainData,data,tc)
 
@@ -463,13 +463,13 @@ print('Feature importance plot for non-DFT Features generated.')
 
 
 #LassoLars
-best=linear_model.LassoLarsCV( max_iter=100000,  cv=5, max_n_alphas=100000, eps=1e-16, copy_X=True)
+best=linear_model.LassoLarsCV( max_iter=100000,  cv=4, max_n_alphas=100000, eps=1e-16, copy_X=True)
 LL=best#Save for ind. Class later
 LL.fit(trainData,trainTc)
 modelEvalReg(best,'LassoLarsReg no DFT data',testTc,trainTc,testData,trainData,data,tc)
 
 #Lasso
-best=linear_model.LassoCV(eps=0.00001, n_alphas=1000, precompute='auto', max_iter=10000, tol=0.00001,cv=5)
+best=linear_model.LassoCV(eps=0.00001, n_alphas=1000, precompute='auto', max_iter=10000, tol=0.00001,cv=4)
 modelEvalReg(best,'LassoReg no DFT data',testTc,trainTc,testData,trainData,data,tc)
 
 #LinReg
