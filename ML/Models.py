@@ -353,6 +353,20 @@ plt.savefig('RedSHAP.png',dpi=1200)
 plt.clf()
 print('Feature importance plot generated.')
 
+##Force Plot per example (One High and one Low)
+shap_values = explainer.shap_values(testData)
+index=np.where(testTc=np.partition(testTc.flatten(), -2)[-2])
+shap.force_plot(explainer.expected_value[index], shap_values[index][index,:], testData.iloc[index,:], link="logit",feature_names=descr,show=False)
+plt.tight_layout()
+plt.savefig('ForceSHAP.png',dpi=1200)
+plt.clf()
+
+shap.force_plot(explainer.expected_value[0], shap_values[0][0,:], testData.iloc[0,:], link="logit",feature_names=descr,show=False)
+plt.tight_layout()
+plt.savefig('ForceSHAPLOW.png',dpi=1200)
+plt.clf()
+print('Force Plot for one high-Tc and one low-Tc generated.')
+
 #Histogram of Tcs
 sns.set_theme(style="whitegrid")
 f, ax = plt.subplots(figsize=(10, 5))
@@ -422,7 +436,7 @@ for i in range (0,len(descrNoDFT)):
     descrNoDFT[i]=descrNoDFT[i].replace('Density Param for atom # 27','Cobalt Density')
     descrNoDFT[i]=descrNoDFT[i].replace('#','\#')
     descrNoDFT[i]=descrNoDFT[i].replace('atom','Atom')
-    descrNoDFT[i]=descrdescrNoDFT[i].replace('_',' ')
+    descrNoDFT[i]=descrNoDFT[i].replace('_',' ')
 
 #SHAP Beeswarm Plot (Mean SHAP Values, SHAP Values and SHAP Values for best 9 Descr.)
 X=pd.DataFrame(trainData,columns=descrNoDFT)
