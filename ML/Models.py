@@ -320,6 +320,7 @@ print('Histogram generated.')
 #Clean Descr Array
 for i in range (0,len(descr)):
     descr[i]=descr[i].replace('Density Param for atom # 27','Cobalt Density')
+    descr[i]=descr[i].replace('Density Param for atom # 25','Manganese Density')
     descr[i]=descr[i].replace('#','\#')
     descr[i]=descr[i].replace('atom','Atom')
     descr[i]=descr[i].replace('_',' ')
@@ -393,6 +394,7 @@ cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
 plt.grid()
 plt.savefig('ConfDirETC.png')
+print('Confusion Matrices generated.')
 
 ##Without DFT
 #Shuffle and split data
@@ -420,9 +422,17 @@ modelEvalReg(best,'ExtraTreesReg no DFT data',testTc,trainTc,testData,trainData,
 #Clean Descr Array
 for i in range (0,len(descrNoDFT)):
     descrNoDFT[i]=descrNoDFT[i].replace('Density Param for atom # 27','Cobalt Density')
+    descrNoDFT[i]=descrNoDFT[i].replace('Density Param for atom # 28','Nickel Density')
+    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of atom 2','$e_2^{val}$')
+    descrNoDFT[i]=descrNoDFT[i].replace('TOTAL # of Valence electrons','$e^{val}_{tot}$')
     descrNoDFT[i]=descrNoDFT[i].replace('#','\#')
     descrNoDFT[i]=descrNoDFT[i].replace('atom','Atom')
     descrNoDFT[i]=descrNoDFT[i].replace('_',' ')
+    descrNoDFT[i]=descrNoDFT[i].replace('vdwrad of Atom 1','$r^{vdw}_1$')
+    descrNoDFT[i]=descrNoDFT[i].replace('eleneg of Atom 2','$\chi_2$')
+    descrNoDFT[i]=descrNoDFT[i].replace('eleaffin of Atom 1','$E_{ea1}$')
+
+
 
 #SHAP Beeswarm Plot (Mean SHAP Values, SHAP Values and SHAP Values for best 9 Descr.)
 X=pd.DataFrame(trainData,columns=descrNoDFT)
@@ -431,20 +441,38 @@ shap_values=explainer(X)
 shap.plots.bar(shap_values,show=False)
 plt.xlabel('Mean SHAP Value')
 plt.tight_layout()
-plt.savefig('MeanSHAP.png',dpi=1200)
+plt.savefig('MeanRedDescrSHAP.png',dpi=1200)
 plt.clf()
 shap.summary_plot(shap_values,show=False)
 plt.xlabel('SHAP Value')
 plt.tight_layout()
-plt.savefig('TotSHAP.png',dpi=1200)
+plt.savefig('TotRedDescrSHAP.png',dpi=1200)
 plt.clf()
 
 shap.summary_plot(shap_values,show=False,max_display=9)
 plt.xlabel('SHAP Value')
 plt.tight_layout()
-plt.savefig('RedSHAP.png',dpi=1200)
+plt.savefig('RedRedDescrSHAP.png',dpi=1200)
 plt.clf()
 print('Feature importance plot for non-DFT Features generated.')
+
+#Mabs + Ferro Den
+sns.set_theme(style='whitegrid')
+h=sns.jointplot(x=data[:,np.where(descrNoDFT=='Ferro Density')[0][0]],y=tc,space = 0)
+h.set_axis_labels('$Density of ferromagnetic Atoms','$\\displaystyle T_c$ in Kelvin')
+xstd=np.std(data[:,np.where(descr=='Ferro Density')[0][0]])
+xmean=np.mean(data[:,np.where(descr=='Ferro Density')[0][0]])
+ystd=np.std(tc)
+ymean=np.mean(tc)
+h.ax_marg_x.axvline(xmean, color='red', ls='--')
+h.ax_marg_x.axvspan(xmean - xstd, xmean + xstd, color='red', alpha=0.1)
+h.ax_marg_y.axhline(ymean, color='red', ls='--')
+h.ax_marg_y.axhspan(ymean - ystd, ymean + ystd, color='red', alpha=0.1)
+plt.tight_layout()
+plt.savefig('TcvsFerrDen.png',dpi=600)
+plt.clf()
+print('T_c vs Ferro Den plot generated.')
+
 
 #LassoLars
 best=linear_model.LassoLarsCV( max_iter=100000,  cv=4, max_n_alphas=100000, eps=1e-16, copy_X=True)
