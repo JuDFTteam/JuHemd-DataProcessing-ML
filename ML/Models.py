@@ -206,7 +206,7 @@ params={'penalty':['l1', 'l2', 'elasticnet'], 'C':[0.1,0.5,1],'solver': ['liblin
 best=opt(LogisticRegression(),'f1',trainData,trainTcClass,params)
 modelEvalClass(best,'LogisticReg',testTcClass,trainTcClass,testData,trainData,data,TcClass)
 
-#Ind LassoLars
+#Ind Lasso
 modelEvalIndClass(LL,'IndirectLASSOClass',testTc,trainTc,testData,trainData,data,tc)
 
 #Ind ETR
@@ -462,10 +462,15 @@ print('Feature importance plot for non-DFT Features generated.')
 
 #Mabs + Den Plot
 for k in ['Ferro Density','Cobalt Density', 'Nickel Density']:
-    sns.set_theme(style='whitegrid')
-    hk=sns.jointplot(x=data[:,np.where(descrNoDFT==k)[0][0]],y=tc,space = 0)
+    #sns.set_theme(style='whitegrid')
+    hk=sns.jointplot(x=data[:,np.where(descrNoDFT==k)[0][0]],y=tc,space = 0,kind='hist',cbar=True)
     if k == 'Ferro Density': hk.set_axis_labels('Density of ferromagnetic Atoms','$\\displaystyle T_c$ in Kelvin')
     else: hk.set_axis_labels(k,'$\\displaystyle T_c$ in Kelvin')
+    plt.subplots_adjust(left=0.1, right=0.8, top=0.9, bottom=0.1)
+    pos_joint_ax = hk.ax_joint.get_position()
+    pos_marg_x_ax = hk.ax_marg_x.get_position() 
+    hk.ax_joint.set_position([pos_joint_ax.x0, pos_joint_ax.y0, pos_marg_x_ax.width, pos_joint_ax.height])
+    hk.fig.axes[-1].set_position([.83, pos_joint_ax.y0, .07, pos_joint_ax.height])
     xstd=np.std(data[:,np.where(descrNoDFT==k)[0][0]])
     xmean=np.mean(data[:,np.where(descrNoDFT==k)[0][0]])
     ystd=np.std(tc)
