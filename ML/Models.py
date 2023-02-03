@@ -463,7 +463,7 @@ print('Feature importance plot for non-DFT Features generated.')
 #Mabs + Den Plot
 for k in ['Ferro Density','Cobalt Density', 'Nickel Density']:
     #sns.set_theme(style='whitegrid')
-    hk=sns.displot(x=data[:,np.where(descrNoDFT==k)[0][0]],y=tc,cbar=True,bins=np.arange(-0.1,1.3,0.2))
+    hk=sns.displot(x=data[:,np.where(descrNoDFT==k)[0][0]],y=tc,cbar=True,binrange=((-0.15,1.05),None))
     if k == 'Ferro Density': hk.set_axis_labels('Density of ferromagnetic Atoms','$\\displaystyle T_c$ in Kelvin')
     else: hk.set_axis_labels(k,'$\\displaystyle T_c$ in Kelvin')
     plt.tight_layout()
