@@ -155,13 +155,12 @@ modelEvalReg(best,'ExtraTreesReg',testTc,trainTc,testData,trainData,data,tc)
 
 #LassoLars
 best=linear_model.LassoLarsCV(max_iter=100000,  cv=4, max_n_alphas=100000, eps=1e-16, copy_X=True)
-LL=best#Save for ind. Class later
-LL.fit(trainData,trainTc)
+best.fit(trainData,trainTc)
 modelEvalReg(best,'LassoLarsReg',testTc,trainTc,testData,trainData,data,tc)
 
 #Lasso
 best=linear_model.LassoCV(eps=0.00001, n_alphas=1000, precompute='auto', max_iter=10000, tol=0.00001,cv=4)
-reg=best#Save for Feature Importance
+LL=best#Save for ind. Class later
 modelEvalReg(best,'LassoReg',testTc,trainTc,testData,trainData,data,tc)
 
 #LinReg
@@ -208,7 +207,7 @@ best=opt(LogisticRegression(),'f1',trainData,trainTcClass,params)
 modelEvalClass(best,'LogisticReg',testTcClass,trainTcClass,testData,trainData,data,TcClass)
 
 #Ind LassoLars
-modelEvalIndClass(LL,'IndirectLASSOLarsClass',testTc,trainTc,testData,trainData,data,tc)
+modelEvalIndClass(LL,'IndirectLASSOClass',testTc,trainTc,testData,trainData,data,tc)
 
 #Ind ETR
 modelEvalIndClass(ETR,'IndirectETRClass',testTc,trainTc,testData,trainData,data,tc)
@@ -256,7 +255,7 @@ plt.clf()
 print('ETR residues plot generated.')
 plt.rcParams.update({'axes.labelsize':10})
 
-#Test Tc LASSOLars
+#Test Tc LASSO
 pred=LL.predict(testData)
 f, ax = plt.subplots(figsize=(5, 5))
 df = pd.DataFrame({"Predicted $T_c$ in Kelvin":pred})
@@ -274,7 +273,7 @@ g1.ax_marg_y.axhline(ymean, color='red', ls='--')
 g1.ax_marg_y.axhspan(ymean - ystd, ymean + ystd, color='red', alpha=0.1)
 plt.savefig("LL.png",dpi=1200)
 plt.clf()
-print('LASSOLars test plot generated.')
+print('LASSO test plot generated.')
 
 #Histogram of Atomic #
 dataOccup=data[:,np.where(descr=='Atomic Numbers of Atom 1')[0][0]:np.where(descr=='Atomic Numbers of Atom 1')[0][0]+4]
@@ -306,7 +305,7 @@ for i in range (0,len(descr)):
     descr[i]=descr[i].replace('Density Param for atom # 25','Manganese Density')
     descr[i]=descr[i].replace('#','\#')
     descr[i]=descr[i].replace('atom','Atom')
-    descr[i]=descr[i].replace('eleneg of Atom 2','$\chi_2$')
+    descr[i]=descr[i].replace('eleneg of Atom 2','$\chi_{2}$')
     descr[i]=descr[i].replace('_',' ')
     descr[i]=descr[i].replace('mAbs','$|M|$')
     descr[i]=descr[i].replace('AbsM1','$|M_1|$')
@@ -382,7 +381,7 @@ plt.grid()
 plt.savefig('ConfIndETR.png')
 plt.clf()
 
-#Indirect via LASSOLars
+#Indirect via LASSO
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),classify(LL.predict(testData),thres,labels).astype(str),labels=['0','1'])
 cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
@@ -424,18 +423,18 @@ modelEvalReg(best,'ExtraTreesReg no DFT data',testTc,trainTc,testData,trainData,
 for i in range (0,len(descrNoDFT)):
     descrNoDFT[i]=descrNoDFT[i].replace('Density Param for atom # 27','Cobalt Density')
     descrNoDFT[i]=descrNoDFT[i].replace('Density Param for atom # 28','Nickel Density')
-    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of atom 2','${e_2}^{val}$')
-    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of Atom 2','${e_2}^{val}$')
-    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of atom 3','${e_3}^{val}$')
-    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of Atom 3','${e_3}^{val}$')
-    descrNoDFT[i]=descrNoDFT[i].replace('TOTAL # of Valence electrons','${e^{val}}_{tot}$')
+    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of atom 2','Atom 2 $e^{val}$')
+    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of Atom 2','Atom 2 $e^{val}$')
+    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of atom 3','Atom 3 $e^{val}$')
+    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of Atom 3','Atom 3 $e^{val}$')
+    descrNoDFT[i]=descrNoDFT[i].replace('TOTAL # of Valence electrons','Total $e^{val}$')
     descrNoDFT[i]=descrNoDFT[i].replace('#','\#')
     descrNoDFT[i]=descrNoDFT[i].replace('atmrad of atom 2','${r_2}^{Atom}$')
     descrNoDFT[i]=descrNoDFT[i].replace('atmrad of Atom 2','${r_2}^{Atom}$')
     descrNoDFT[i]=descrNoDFT[i].replace('atom','Atom')
     descrNoDFT[i]=descrNoDFT[i].replace('_',' ')
     descrNoDFT[i]=descrNoDFT[i].replace('vdwrad of Atom 1','$r^{vdw}_1$')
-    descrNoDFT[i]=descrNoDFT[i].replace('eleneg of Atom 2','$\chi_2$')
+    descrNoDFT[i]=descrNoDFT[i].replace('eleneg of Atom 2','$\chi_{2}$')
     descrNoDFT[i]=descrNoDFT[i].replace('eleaffin of Atom 1','$E_{ea1}$')
 
 #SHAP Beeswarm Plot (Mean SHAP Values, SHAP Values and SHAP Values for best 9 Descr.)
@@ -461,12 +460,12 @@ plt.savefig('RedRedDescrSHAP.png',dpi=1200)
 plt.clf()
 print('Feature importance plot for non-DFT Features generated.')
 
-#Mabs + Ferro Den Plot
+#Mabs + Den Plot
 for k in ['Ferro Density','Cobalt Density', 'Nickel Density']:
     sns.set_theme(style='whitegrid')
     hk=sns.jointplot(x=data[:,np.where(descrNoDFT==k)[0][0]],y=tc,space = 0)
-    if k == 'Ferro Density': h.set_axis_labels('Density of ferromagnetic Atoms','$\\displaystyle T_c$ in Kelvin')
-    else: h.set_axis_labels(k,'$\\displaystyle T_c$ in Kelvin')
+    if k == 'Ferro Density': hk.set_axis_labels('Density of ferromagnetic Atoms','$\\displaystyle T_c$ in Kelvin')
+    else: hk.set_axis_labels(k,'$\\displaystyle T_c$ in Kelvin')
     xstd=np.std(data[:,np.where(descrNoDFT==k)[0][0]])
     xmean=np.mean(data[:,np.where(descrNoDFT==k)[0][0]])
     ystd=np.std(tc)
@@ -484,12 +483,12 @@ for k in ['Ferro Density','Cobalt Density', 'Nickel Density']:
 
 #LassoLars
 best=linear_model.LassoLarsCV( max_iter=100000,  cv=4, max_n_alphas=100000, eps=1e-16, copy_X=True)
-LL=best#Save for ind. Class later
-LL.fit(trainData,trainTc)
+best.fit(trainData,trainTc)
 modelEvalReg(best,'LassoLarsReg no DFT data',testTc,trainTc,testData,trainData,data,tc)
 
 #Lasso
 best=linear_model.LassoCV(eps=0.00001, n_alphas=1000, precompute='auto', max_iter=10000, tol=0.00001,cv=4)
+LL=best#Save for ind. Class later
 modelEvalReg(best,'LassoReg no DFT data',testTc,trainTc,testData,trainData,data,tc)
 
 #LinReg
@@ -535,8 +534,8 @@ params={'penalty':['l1', 'l2', 'elasticnet'], 'C':[0.1,0.5,1],'solver': ['liblin
 best=opt(LogisticRegression(),'f1',trainData,trainTcClass,params)
 modelEvalClass(best,'Logistic no DFT data',testTcClass.astype(int),trainTcClass.astype(int),testData,trainData,data,TcClass.astype(int))
 
-#Ind LassoLars
-modelEvalIndClass(LL,'IndirectLASSOLarsClass no DFT data',testTc,trainTc,testData,trainData,data,tc)
+#Ind Lasso
+modelEvalIndClass(LL,'IndirectLASSOClass no DFT data',testTc,trainTc,testData,trainData,data,tc)
 
 #Ind ETR
 modelEvalIndClass(ETR,'IndirectETR Class no DFT data',testTc,trainTc,testData,trainData,data,tc)
@@ -550,7 +549,7 @@ plt.grid()
 plt.savefig('ConfIndETRNoDFT.png')
 plt.clf()
 
-#Indirect via LASSOLars
+#Indirect via LASSO
 cm=confusion_matrix(classify(testTc,thres,labels).astype(str),classify(LL.predict(testData),thres,labels).astype(str),labels=['0','1'])
 cmd = ConfusionMatrixDisplay(cm,display_labels=['Low $T_c$','High $T_c$'])
 cmd.plot()
