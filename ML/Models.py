@@ -340,7 +340,7 @@ print('\n Feature importance plot generated.')
 #Mabs + Tc plot
 sns.set_theme(style='whitegrid')
 h=sns.jointplot(x=data[:,np.where(descr=='$|M|$')[0][0]],y=tc,space = 0)
-h.set_axis_labels('$\\displaystyle M_{Abs}$ in $\mu_B$','$\\displaystyle T_c$ in Kelvin')
+h.set_axis_labels('$\\displaystyle |M|$ in $\mu_B$','$\\displaystyle T_c$ in Kelvin')
 xstd=np.std(data[:,np.where(descr=='$|M|$')[0][0]])
 xmean=np.mean(data[:,np.where(descr=='$|M|$')[0][0]])
 ystd=np.std(tc)
@@ -353,6 +353,23 @@ plt.tight_layout()
 plt.savefig('TcvsM.png',dpi=600)
 plt.clf()
 print('T_c vs M_abs plot generated.')
+
+#Mtot + Tc plot
+sns.set_theme(style='whitegrid')
+h=sns.jointplot(x=data[:,np.where(descr=='$M$')[0][0]],y=tc,space = 0)
+h.set_axis_labels('$\\displaystyle M$ in $\mu_B$','$\\displaystyle T_c$ in Kelvin')
+xstd=np.std(data[:,np.where(descr=='$M$')[0][0]])
+xmean=np.mean(data[:,np.where(descr=='$M$')[0][0]])
+ystd=np.std(tc)
+ymean=np.mean(tc)
+h.ax_marg_x.axvline(xmean, color='red', ls='--')
+h.ax_marg_x.axvspan(xmean - xstd, xmean + xstd, color='red', alpha=0.1)
+h.ax_marg_y.axhline(ymean, color='red', ls='--')
+h.ax_marg_y.axhspan(ymean - ystd, ymean + ystd, color='red', alpha=0.1)
+plt.tight_layout()
+plt.savefig('TcvsMTot.png',dpi=600)
+plt.clf()
+print('T_c vs M_tot plot generated.')
 
 #Histogram of Tcs
 sns.set_theme(style="whitegrid")
@@ -423,10 +440,10 @@ modelEvalReg(best,'ExtraTreesReg no DFT data',testTc,trainTc,testData,trainData,
 for i in range (0,len(descrNoDFT)):
     descrNoDFT[i]=descrNoDFT[i].replace('Density Param for atom # 27','Cobalt Density')
     descrNoDFT[i]=descrNoDFT[i].replace('Density Param for atom # 28','Nickel Density')
-    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of atom 2','Atom 2 $e^{val}$')
-    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of Atom 2','Atom 2 $e^{val}$')
-    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of atom 3','Atom 3 $e^{val}$')
-    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of Atom 3','Atom 3 $e^{val}$')
+    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of atom 2','$e^{val}$ of Atom 2')
+    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of Atom 2','$e^{val}$ of Atom 2')
+    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of atom 3','$e^{val}$ of Atom 3 ')
+    descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of Atom 3','$e^{val}$ of Atom 3 ')
     descrNoDFT[i]=descrNoDFT[i].replace('TOTAL # of Valence electrons','Total $e^{val}$')
     descrNoDFT[i]=descrNoDFT[i].replace('#','\#')
     descrNoDFT[i]=descrNoDFT[i].replace('atmrad of atom 2','$r^{Atom}_2$')
@@ -460,19 +477,32 @@ plt.savefig('RedRedDescrSHAP.png',dpi=1200)
 plt.clf()
 print('Feature importance plot for non-DFT Features generated.')
 
-#Mabs + Den Plot
-for k in ['Ferro Density','Cobalt Density', 'Nickel Density']:
+#Mabs + Den Plots
+for k in ['Ferro Density','Cobalt Density', 'Nickel Density', 'Manganese Density']:
     #sns.set_theme(style='whitegrid')
-    hk=sns.displot(x=data[:,np.where(descrNoDFT==k)[0][0]],y=tc,cbar=True,binrange=((-0.05,1.15),None))
-    if k == 'Ferro Density': hk.set_axis_labels('Density of ferromagnetic Atoms','$\\displaystyle T_c$ in Kelvin')
-    else: hk.set_axis_labels(k,'$\\displaystyle T_c$ in Kelvin')
+    if k == 'Ferro Density': 
+        hk=sns.displot(x=data[:,np.where(descrNoDFT==k)[0][0]],y=tc,cbar=True,bins=(5,10),binrange=((-0.125,1.125),None))
+        plt.xticks([-0.25,0.0,0.25,0.5,0.75,1])
+        hk.set_axis_labels('Density of ferromagnetic Atoms','$\\displaystyle T_c$ in Kelvin')
+    else: 
+        hk=sns.displot(x=data[:,np.where(descrNoDFT==k)[0][0]],y=tc,cbar=True,bins=(4,10),binrange=((-0.125,0.875),None))
+        hk.set_axis_labels(k,'$\\displaystyle T_c$ in Kelvin')
+        plt.xticks([0.0, 0.25,0.5,0.75,1])
     plt.tight_layout()
     plt.xlim(np.min(data[:,np.where(descrNoDFT==k)[0][0]])-0.25,np.max(data[:,np.where(descrNoDFT==k)[0][0]])+0.25)
     plt.savefig('Tcvs'+k+'.png',dpi=600)
     plt.clf()
     print('T_c vs '+k+' plot generated.')
-#python -m sklearnex my_application.py
-
+    
+#T_c vs Symmetry Code  
+sns.set_theme(style='whitegrid')
+h=sns.scatterplot(x=data[:,np.where(descrNoDFT=='Symmetry Code')[0][0]],y=tc)
+h.set_axis_labels('Symmetry Code','$\\displaystyle T_c$ in Kelvin')
+plt.tight_layout()
+plt.savefig('TcvsSymCode.png',dpi=600)
+plt.clf()
+print('T_c vs Symmetry Code plot generated.')
+    
 #LassoLars
 best=linear_model.LassoLarsCV( max_iter=100000,  cv=4, max_n_alphas=100000, eps=1e-16, copy_X=True)
 best.fit(trainData,trainTc)
