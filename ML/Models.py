@@ -8,6 +8,7 @@
 # This file is available as free software under the conditions
 # of the MIT license as expressed in the LICENSE file in more detail.
 #--------------------------------------------------------------------------------
+
 #Deactivate warnings which arise regulary in the GridSearch due to unconerged models.
 def warn(*args, **kwargs):
     pass
@@ -440,6 +441,7 @@ modelEvalReg(best,'ExtraTreesReg no DFT data',testTc,trainTc,testData,trainData,
 for i in range (0,len(descrNoDFT)):
     descrNoDFT[i]=descrNoDFT[i].replace('Density Param for atom # 27','Cobalt Density')
     descrNoDFT[i]=descrNoDFT[i].replace('Density Param for atom # 28','Nickel Density')
+    descrNoDFT[i]=descrNoDFT[i].replace('Density Param for atom # 25','Manganese Density')
     descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of atom 2','$e^{val}$ of Atom 2')
     descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of Atom 2','$e^{val}$ of Atom 2')
     descrNoDFT[i]=descrNoDFT[i].replace('# of Valence electrons of atom 3','$e^{val}$ of Atom 3 ')
@@ -479,14 +481,15 @@ print('Feature importance plot for non-DFT Features generated.')
 
 #Mabs + Den Plots
 for k in ['Ferro Density','Cobalt Density', 'Nickel Density', 'Manganese Density']:
-    #sns.set_theme(style='whitegrid')
+    sns.set_theme(style='whitegrid')
+    #plt.grid()
     if k == 'Ferro Density': 
         hk=sns.displot(x=data[:,np.where(descrNoDFT==k)[0][0]],y=tc,cbar=True,bins=(5,10),binrange=((-0.125,1.125),None))
         plt.xticks([-0.25,0.0,0.25,0.5,0.75,1])
-        hk.set_axis_labels('Density of ferromagnetic Atoms','$\\displaystyle T_c$ in Kelvin')
+        hk.set_axis_labels('Fraction of ferromagnetic Atoms','$\\displaystyle T_c$ in Kelvin')
     else: 
         hk=sns.displot(x=data[:,np.where(descrNoDFT==k)[0][0]],y=tc,cbar=True,bins=(4,10),binrange=((-0.125,0.875),None))
-        hk.set_axis_labels(k,'$\\displaystyle T_c$ in Kelvin')
+        hk.set_axis_labels(k.replace('Density','Fraction'),'$\\displaystyle T_c$ in Kelvin')
         plt.xticks([0.0, 0.25,0.5,0.75,1])
     plt.tight_layout()
     plt.xlim(np.min(data[:,np.where(descrNoDFT==k)[0][0]])-0.25,np.max(data[:,np.where(descrNoDFT==k)[0][0]])+0.25)
@@ -496,8 +499,9 @@ for k in ['Ferro Density','Cobalt Density', 'Nickel Density', 'Manganese Density
     
 #T_c vs Symmetry Code  
 sns.set_theme(style='whitegrid')
-h=sns.scatterplot(x=data[:,np.where(descrNoDFT=='Symmetry Code')[0][0]],y=tc)
-h.set_axis_labels('Symmetry Code','$\\displaystyle T_c$ in Kelvin')
+h=sns.displot(x=data[:,np.where(descrNoDFT=='Symmetry Code')[0][0]],y=tc,cbar=True,bins=(int(np.max(data[:,np.where(descrNoDFT=='Symmetry Code')[0][0]])+1),10),binrange=((np.min(data[:,np.where(descrNoDFT=='Symmetry Code')[0][0]])-0.5,np.max(data[:,np.where(descrNoDFT=='Symmetry Code')[0][0]])+0.5),None))
+plt.xlabel('Symmetry Code')
+plt.ylabel('$\\displaystyle T_c$ in Kelvin')
 plt.tight_layout()
 plt.savefig('TcvsSymCode.png',dpi=600)
 plt.clf()
