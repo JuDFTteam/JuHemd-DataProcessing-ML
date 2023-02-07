@@ -314,7 +314,7 @@ for i in range (0,len(descr)):
     descr[i]=descr[i].replace('M1','$M_1$')
     descr[i]=descr[i].replace('AbsM3','$|M_3|$')
     descr[i]=descr[i].replace('M3','$M_3$')
-    descr[i]=descr[i].replace('Magn State','Mangetic State')
+    descr[i]=descr[i].replace('Magn State','Magnetic State')
 
 #SHAP Beeswarm Plot (Mean SHAP Values, SHAP Values and SHAP Values for best 9 Descr.)
 X=pd.DataFrame(trainData,columns=descr)
