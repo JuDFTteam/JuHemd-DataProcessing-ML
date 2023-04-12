@@ -9,7 +9,7 @@
 # of the MIT license as expressed in the LICENSE file in more detail.
 #--------------------------------------------------------------------------------
 
-#Deactivate warnings which arise regulary in the GridSearch due to unconerged models.
+#Deactivate warnings which arise regulary in the GridSearch due to unconverged models.
 def warn(*args, **kwargs):
     pass
 import warnings
