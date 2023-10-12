@@ -648,10 +648,11 @@ def load_magnetism(data):
 def load_sym_strings_encoded(data):
     labels, err = load_single_element('label', data) 
     uniqueLab = np.unique(labels)
+    np.savetxt("sym.txt",labels,fmt="%s")
     intArray = np.zeros(0,dtype=int)
     for i in range(0, len(labels)):
         intArray = np.append(intArray,np.where(labels[i] == uniqueLab[:]))
-    return intArray, err
+    return intArray, labels, err
 
 #Loads the Heuslers data from the named .json file. This file is available under: https://archive.materialscloud.org/record/2022.28
 #Loads the descripors provided by the previous functions, performs most of the error handling and composes a list of strings which contains the descripor names. 
@@ -665,7 +666,7 @@ def loadHeuslersData():
     for i in data_to_be_loaded_simply:
         dataFrame, qStringsData,errN = load_and_append_single_element(i, data, qStringsData, dataFrame)
         err = errHandl(err, errN)
-    syStr,errN = load_sym_strings_encoded(data)
+    syStr, labels, errN = load_sym_strings_encoded(data)
     err=errHandl(err,errN)
     dataFrame, qStringsData = append_single_element('Symmetry Code', syStr, qStringsData, dataFrame)
     mtot, mabs, M1, M2, M3, M4, absm1, absm2, absm3, absm4, state,errNe = load_magnetism(data)
